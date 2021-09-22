@@ -17,6 +17,18 @@ impl event::EventHandler<ggez::GameError> for MainState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
+        let player_rect = graphics::Rect::new(0.0, 0.0, 100.0, 100.0);
+        let player_mesh = graphics::Mesh::new_rectangle(
+            ctx,
+            graphics::DrawMode::fill(),
+            player_rect,
+            graphics::Color::WHITE,
+        )?;
+        let draw_param = graphics::DrawParam::new();
+        let player_dist = glam::Vec2::new(0.0, 0.0);
+        graphics::draw(ctx, &player_mesh, draw_param.dest(player_dist))?;
+        graphics::present(ctx)?;
+
         Ok(())
     }
 }
