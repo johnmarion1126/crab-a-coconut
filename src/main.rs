@@ -16,7 +16,8 @@ struct MainState {
 impl MainState {
     pub fn new(ctx: &mut Context) -> Self {
         let image = graphics::Image::new(ctx, "/crab.png").unwrap();
-        let batch = graphics::spritebatch::SpriteBatch::new(image);
+        let mut batch = graphics::spritebatch::SpriteBatch::new(image);
+        batch.set_filter(graphics::FilterMode::Nearest);
 
         let (SCREEN_WIDTH, SCREEN_HEIGHT) = graphics::drawable_size(ctx);
         let (SCREEN_WIDTH_HALF, SCREEN_HEIGHT_HALF) = (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
@@ -58,7 +59,7 @@ impl event::EventHandler<ggez::GameError> for MainState {
         // )?;
 
         let crab_dist = glam::Vec2::new(self.SCREEN_WIDTH_HALF, self.SCREEN_HEIGHT_HALF);
-        let crab_scale = glam::Vec2::new(1.0, 1.0);
+        let crab_scale = glam::Vec2::new(5.0, 5.0);
 
         self.sprite_batch.add(draw_param);
         graphics::draw(
@@ -85,6 +86,7 @@ fn main() -> GameResult {
         ggez::ContextBuilder::new("Crab-A-Coconut", "John").add_resource_path(resource_dir);
     let (mut ctx, event_loop) = context_builder.build()?;
     graphics::set_window_title(&ctx, "Crab-A-Coconut");
+    graphics::set_default_filter(&mut ctx, graphics::FilterMode::Nearest);
 
     let state = MainState::new(&mut ctx);
     event::run(ctx, event_loop, state);
