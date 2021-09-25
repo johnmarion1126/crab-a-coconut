@@ -39,25 +39,6 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let draw_param = graphics::DrawParam::new();
-
-        // let player_rect = graphics::Rect::new(0.0, 0.0, 100.0, 100.0);
-        // let player_mesh = graphics::Mesh::new_rectangle(
-        //     ctx,
-        //     graphics::DrawMode::fill(),
-        //     player_rect,
-        //     graphics::Color::WHITE,
-        // )?;
-        // let player_dist = glam::Vec2::new(
-        //     self.SCREEN_WIDTH_HALF - 50.0,
-        //     self.SCREEN_HEIGHT_HALF - 50.0,
-        // );
-        // let player_scale = glam::Vec2::new(2.0, 2.0);
-        // graphics::draw(
-        //     ctx,
-        //     &player_mesh,
-        //     draw_param.dest(player_dist).scale(player_scale),
-        // )?;
-
         let crab_dist = glam::Vec2::new(self.SCREEN_WIDTH_HALF, self.SCREEN_HEIGHT_HALF);
         let crab_scale = glam::Vec2::new(5.0, 5.0);
 
