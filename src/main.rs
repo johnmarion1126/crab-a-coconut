@@ -6,7 +6,8 @@ use std::env;
 use std::path;
 
 struct MainState {
-    sprite_batch: graphics::spritebatch::SpriteBatch,
+    player_rect: graphics::Rect,
+    player_sprite_batch: graphics::spritebatch::SpriteBatch,
     SCREEN_HEIGHT: f32,
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
@@ -15,15 +16,17 @@ struct MainState {
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> Self {
-        let image = graphics::Image::new(ctx, "/crab.png").unwrap();
-        let mut batch = graphics::spritebatch::SpriteBatch::new(image);
+        let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
+        let player_rect = player_image.dimensions();
+        let mut batch = graphics::spritebatch::SpriteBatch::new(player_image);
         batch.set_filter(graphics::FilterMode::Nearest);
 
         let (SCREEN_WIDTH, SCREEN_HEIGHT) = graphics::drawable_size(ctx);
         let (SCREEN_WIDTH_HALF, SCREEN_HEIGHT_HALF) = (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
 
         MainState {
-            sprite_batch: batch,
+            player_rect: player_rect,
+            player_sprite_batch: batch,
             SCREEN_HEIGHT: SCREEN_HEIGHT,
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
@@ -39,17 +42,34 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let draw_param = graphics::DrawParam::new();
-        let crab_dist = glam::Vec2::new(self.SCREEN_WIDTH_HALF, self.SCREEN_HEIGHT_HALF);
-        let crab_scale = glam::Vec2::new(5.0, 5.0);
+        let game_scale = glam::Vec2::new(5.0, 5.0);
 
-        self.sprite_batch.add(draw_param);
+        let player_dist = glam::Vec2::new(self.SCREEN_WIDTH_HALF, self.SCREEN_HEIGHT_HALF);
+        self.player_sprite_batch.add(draw_param);
         graphics::draw(
             ctx,
-            &self.sprite_batch,
-            draw_param.dest(crab_dist).scale(crab_scale),
+            &self.player_sprite_batch,
+            draw_param.dest(player_dist).scale(game_scale),
+        )?;
+
+        let player_mesh = graphics::Mesh::new_rectangle(
+            ctx,
+            graphics::DrawMode::stroke(1.0),
+            graphics::Rect::new(
+                self.player_rect.x,
+                self.player_rect.y + 4.0,
+                self.player_rect.w,
+                self.player_rect.h - 5.0,
+            ),
+            graphics::Color::WHITE,
+        )?;
+
+        graphics::draw(
+            ctx,
+            &player_mesh,
+            draw_param.dest(player_dist).scale(game_scale),
         )?;
         graphics::present(ctx)?;
-
         Ok(())
     }
 }
