@@ -1,6 +1,7 @@
 // Dependencies
 use ggez::event;
 use ggez::graphics;
+use ggez::input::keyboard;
 use ggez::{Context, GameResult};
 use std::env;
 use std::path;
@@ -37,6 +38,12 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
+        if keyboard::is_key_pressed(ctx, keyboard::KeyCode::W) {
+            println!("Keycode w");
+        }
+        if keyboard::is_key_pressed(ctx, keyboard::KeyCode::S) {
+            println!("Keycode s");
+        }
         Ok(())
     }
 
