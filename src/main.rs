@@ -9,6 +9,8 @@ use std::path;
 struct MainState {
     player_rect: graphics::Rect,
     player_sprite_batch: graphics::spritebatch::SpriteBatch,
+    coconut_rect: graphics::Rect,
+    coconut_sprite_batch: graphics::spritebatch::SpriteBatch,
     SCREEN_HEIGHT: f32,
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
@@ -19,15 +21,22 @@ impl MainState {
     pub fn new(ctx: &mut Context) -> Self {
         let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
         let player_rect = player_image.dimensions();
-        let mut batch = graphics::spritebatch::SpriteBatch::new(player_image);
-        batch.set_filter(graphics::FilterMode::Nearest);
+        let mut player_sprite_batch = graphics::spritebatch::SpriteBatch::new(player_image);
+        player_sprite_batch.set_filter(graphics::FilterMode::Nearest);
+
+        let coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
+        let coconut_rect = coconut_image.dimensions();
+        let mut coconut_sprite_batch = graphics::spritebatch::SpriteBatch::new(coconut_image);
+        coconut_sprite_batch.set_filter(graphics::FilterMode::Nearest);
 
         let (SCREEN_WIDTH, SCREEN_HEIGHT) = graphics::drawable_size(ctx);
         let (SCREEN_WIDTH_HALF, SCREEN_HEIGHT_HALF) = (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
 
         MainState {
             player_rect: player_rect,
-            player_sprite_batch: batch,
+            player_sprite_batch: player_sprite_batch,
+            coconut_rect: coconut_rect,
+            coconut_sprite_batch: coconut_sprite_batch,
             SCREEN_HEIGHT: SCREEN_HEIGHT,
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
@@ -40,14 +49,21 @@ impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         if keyboard::is_key_pressed(ctx, keyboard::KeyCode::W) {
             println!("Keycode w");
+            let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
+            self.player_sprite_batch.clear();
+            self.player_sprite_batch.set_image(player_image);
         }
         if keyboard::is_key_pressed(ctx, keyboard::KeyCode::S) {
             println!("Keycode s");
+            let coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
+            self.player_sprite_batch.clear();
+            self.player_sprite_batch.set_image(coconut_image);
         }
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
+        graphics::clear(ctx, graphics::Color::BLACK);
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(5.0, 5.0);
 
