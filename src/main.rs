@@ -55,8 +55,8 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        player::move_player(&mut self.player_pos, KeyCode::A, -1.0, ctx);
-        player::move_player(&mut self.player_pos, KeyCode::D, 1.0, ctx);
+        player::move_player(&mut self.player_pos, KeyCode::A, -1.0, ctx, self.player_rect.w);
+        player::move_player(&mut self.player_pos, KeyCode::D, 1.0, ctx, self.player_rect.w);
 
         // if keyboard::is_key_pressed(ctx, keyboard::KeyCode::W) {
         //     let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
