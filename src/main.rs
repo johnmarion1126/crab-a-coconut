@@ -10,6 +10,9 @@ use std::path;
 #[path = "./objects/player.rs"]
 mod player;
 
+// Constants
+const BOTTOM_PADDING: f32 = 100.0;
+
 struct MainState {
     player_rect: graphics::Rect,
     coconut_rect: graphics::Rect,
@@ -35,7 +38,7 @@ impl MainState {
         let (SCREEN_WIDTH, SCREEN_HEIGHT) = graphics::drawable_size(ctx);
         let (SCREEN_WIDTH_HALF, SCREEN_HEIGHT_HALF) = (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
 
-        let player_pos = glam::Vec2::new(SCREEN_WIDTH_HALF - player_rect.w, SCREEN_HEIGHT_HALF - player_rect.h);
+        let player_pos = glam::Vec2::new(SCREEN_WIDTH_HALF - player_rect.w*2.0, SCREEN_HEIGHT - BOTTOM_PADDING);
 
         MainState {
             player_rect: player_rect,
