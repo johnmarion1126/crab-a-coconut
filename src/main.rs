@@ -1,15 +1,23 @@
 // Dependencies
 use ggez::event;
 use ggez::graphics;
-use ggez::input::keyboard;
+use ggez::input::keyboard::KeyCode;
 use ggez::{Context, GameResult};
 use std::env;
 use std::path;
+
+// Objects
+#[path = "./objects/player.rs"]
+mod player;
+
+// Constants
+const BOTTOM_PADDING: f32 = 100.0;
 
 struct MainState {
     player_rect: graphics::Rect,
     coconut_rect: graphics::Rect,
     sprite_batch: graphics::spritebatch::SpriteBatch,
+    player_pos: glam::Vec2,
     SCREEN_HEIGHT: f32,
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
@@ -30,10 +38,13 @@ impl MainState {
         let (SCREEN_WIDTH, SCREEN_HEIGHT) = graphics::drawable_size(ctx);
         let (SCREEN_WIDTH_HALF, SCREEN_HEIGHT_HALF) = (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
 
+        let player_pos = glam::Vec2::new(SCREEN_WIDTH_HALF - player_rect.w*2.0, SCREEN_HEIGHT - BOTTOM_PADDING);
+
         MainState {
             player_rect: player_rect,
             coconut_rect: coconut_rect,
             sprite_batch: sprite_batch,
+            player_pos: player_pos,
             SCREEN_HEIGHT: SCREEN_HEIGHT,
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
@@ -44,16 +55,19 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        if keyboard::is_key_pressed(ctx, keyboard::KeyCode::W) {
-            let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
-            self.sprite_batch.clear();
-            self.sprite_batch.set_image(player_image);
-        }
-        if keyboard::is_key_pressed(ctx, keyboard::KeyCode::S) {
-            let coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
-            self.sprite_batch.clear();
-            self.sprite_batch.set_image(coconut_image);
-        }
+        player::move_player(&mut self.player_pos, KeyCode::A, -1.0, ctx, self.player_rect.w);
+        player::move_player(&mut self.player_pos, KeyCode::D, 1.0, ctx, self.player_rect.w);
+
+        // if keyboard::is_key_pressed(ctx, keyboard::KeyCode::W) {
+        //     let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
+        //     self.sprite_batch.clear();
+        //     self.sprite_batch.set_image(player_image);
+        // }
+        // if keyboard::is_key_pressed(ctx, keyboard::KeyCode::S) {
+        //     let coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
+        //     self.sprite_batch.clear();
+        //     self.sprite_batch.set_image(coconut_image);
+        // }
         Ok(())
     }
 
@@ -62,12 +76,11 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(5.0, 5.0);
 
-        let player_dist = glam::Vec2::new(self.SCREEN_WIDTH_HALF, self.SCREEN_HEIGHT_HALF);
         self.sprite_batch.add(draw_param);
         graphics::draw(
             ctx,
             &self.sprite_batch,
-            draw_param.dest(player_dist).scale(game_scale),
+            draw_param.dest(self.player_pos).scale(game_scale),
         )?;
 
         let player_mesh = graphics::Mesh::new_rectangle(
@@ -85,7 +98,7 @@ impl event::EventHandler<ggez::GameError> for MainState {
         graphics::draw(
             ctx,
             &player_mesh,
-            draw_param.dest(player_dist).scale(game_scale),
+            draw_param.dest(self.player_pos).scale(game_scale),
         )?;
         graphics::present(ctx)?;
         Ok(())
