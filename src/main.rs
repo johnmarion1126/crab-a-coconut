@@ -12,6 +12,7 @@ mod player;
 
 // Constants
 const BOTTOM_PADDING: f32 = 100.0;
+const SCALE: f32 = 5.0;
 
 struct MainState {
     player_image: graphics::Image,
@@ -38,7 +39,7 @@ impl MainState {
         let (SCREEN_WIDTH, SCREEN_HEIGHT) = graphics::drawable_size(ctx);
         let (SCREEN_WIDTH_HALF, SCREEN_HEIGHT_HALF) = (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
 
-        let player_pos = glam::Vec2::new(SCREEN_WIDTH_HALF - player_rect.w*2.0, SCREEN_HEIGHT - BOTTOM_PADDING);
+        let player_pos = glam::Vec2::new(SCREEN_WIDTH_HALF - (player_rect.w*SCALE)/2.0, SCREEN_HEIGHT - BOTTOM_PADDING);
 
         MainState {
             player_image: player_image,
@@ -56,15 +57,15 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        player::move_player(&mut self.player_pos, KeyCode::A, -1.0, ctx, self.player_rect.w);
-        player::move_player(&mut self.player_pos, KeyCode::D, 1.0, ctx, self.player_rect.w);
+        player::move_player(&mut self.player_pos, KeyCode::A, -1.0, ctx, self.player_rect.w, SCALE);
+        player::move_player(&mut self.player_pos, KeyCode::D, 1.0, ctx, self.player_rect.w, SCALE);
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::Color::BLACK);
         let draw_param = graphics::DrawParam::new();
-        let game_scale = glam::Vec2::new(5.0, 5.0);
+        let game_scale = glam::Vec2::new(SCALE, SCALE);
 
         graphics::draw(
             ctx,
