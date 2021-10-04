@@ -20,6 +20,7 @@ struct MainState {
     coconut_image: graphics::Image,
     coconut_rect: graphics::Rect,
     player_pos: glam::Vec2,
+    spawn_time: f32,
     SCREEN_HEIGHT: f32,
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
@@ -47,6 +48,7 @@ impl MainState {
             coconut_image: coconut_image,
             coconut_rect: coconut_rect,
             player_pos: player_pos,
+            spawn_time: 0.0,
             SCREEN_HEIGHT: SCREEN_HEIGHT,
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
@@ -57,6 +59,10 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
+        self.spawn_time += 1.0;
+        if self.spawn_time == 200.0 {
+            self.spawn_time = 0.0;
+        }
         player::move_player(&mut self.player_pos, KeyCode::A, -1.0, ctx, self.player_rect.w, SCALE);
         player::move_player(&mut self.player_pos, KeyCode::D, 1.0, ctx, self.player_rect.w, SCALE);
         Ok(())
