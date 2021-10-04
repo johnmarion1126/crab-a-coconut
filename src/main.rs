@@ -9,6 +9,8 @@ use std::path;
 // Objects
 #[path = "./objects/player.rs"]
 mod player;
+#[path = "./objects/coconut.rs"]
+mod coconut;
 
 // Constants
 const BOTTOM_PADDING: f32 = 100.0;
