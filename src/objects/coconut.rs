@@ -6,9 +6,9 @@ use ggez::Context;
 const COCONUT_SPEED: f32 = 300.0;
 
 pub struct Coconut {
-    coconut_image: graphics::Image,
-    coconut_rect: graphics::Rect,
-    coconut_pos: glam::Vec2,
+    pub coconut_image: graphics::Image,
+    pub coconut_rect: graphics::Rect,
+    pub coconut_pos: glam::Vec2,
 }
 
 pub fn new_coconut(ctx: &mut Context) -> Coconut {

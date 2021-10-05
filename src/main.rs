@@ -21,6 +21,7 @@ struct MainState {
     player_rect: graphics::Rect,
     player_pos: glam::Vec2,
     spawn_time: f32,
+    coconuts: Vec<coconut::Coconut>,
     SCREEN_HEIGHT: f32,
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
@@ -46,6 +47,7 @@ impl MainState {
             player_rect: player_rect,
             player_pos: player_pos,
             spawn_time: 0.0,
+            coconuts: vec![],
             SCREEN_HEIGHT: SCREEN_HEIGHT,
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
@@ -59,6 +61,7 @@ impl event::EventHandler<ggez::GameError> for MainState {
         self.spawn_time += 1.0;
         if self.spawn_time == 200.0 {
             self.spawn_time = 0.0;
+            self.coconuts.push(coconut::new_coconut(ctx));
         }
         player::move_player(
             &mut self.player_pos,
@@ -90,6 +93,13 @@ impl event::EventHandler<ggez::GameError> for MainState {
             draw_param.dest(self.player_pos).scale(game_scale),
         )?;
 
+        for coconut in &self.coconuts {
+            graphics::draw(
+                ctx,
+                &coconut.coconut_image,
+                draw_param.dest(coconut.coconut_pos).scale(game_scale),
+            )?;
+        }
         let player_mesh = graphics::Mesh::new_rectangle(
             ctx,
             graphics::DrawMode::stroke(1.0),
