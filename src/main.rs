@@ -7,17 +7,19 @@ use std::env;
 use std::path;
 
 // Objects
+#[path = "./objects/coconut.rs"]
+mod coconut;
 #[path = "./objects/player.rs"]
 mod player;
 
 // Constants
 const BOTTOM_PADDING: f32 = 100.0;
+const SCALE: f32 = 5.0;
 
 struct MainState {
-    player_rect: graphics::Rect,
-    coconut_rect: graphics::Rect,
-    sprite_batch: graphics::spritebatch::SpriteBatch,
-    player_pos: glam::Vec2,
+    spawn_time: f32,
+    coconuts: Vec<coconut::Coconut>,
+    player: player::Player,
     SCREEN_HEIGHT: f32,
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
@@ -26,25 +28,16 @@ struct MainState {
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> Self {
-        let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
-        let player_rect = player_image.dimensions();
-
-        let coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
-        let coconut_rect = coconut_image.dimensions();
-
-        let mut sprite_batch = graphics::spritebatch::SpriteBatch::new(player_image);
-        sprite_batch.set_filter(graphics::FilterMode::Nearest);
-
         let (SCREEN_WIDTH, SCREEN_HEIGHT) = graphics::drawable_size(ctx);
         let (SCREEN_WIDTH_HALF, SCREEN_HEIGHT_HALF) = (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5);
 
-        let player_pos = glam::Vec2::new(SCREEN_WIDTH_HALF - player_rect.w*2.0, SCREEN_HEIGHT - BOTTOM_PADDING);
+        let player =
+            player::new_player(ctx, SCREEN_HEIGHT, SCREEN_WIDTH_HALF, BOTTOM_PADDING, SCALE);
 
         MainState {
-            player_rect: player_rect,
-            coconut_rect: coconut_rect,
-            sprite_batch: sprite_batch,
-            player_pos: player_pos,
+            spawn_time: 0.0,
+            coconuts: vec![],
+            player: player,
             SCREEN_HEIGHT: SCREEN_HEIGHT,
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
@@ -55,42 +48,51 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        player::move_player(&mut self.player_pos, KeyCode::A, -1.0, ctx, self.player_rect.w);
-        player::move_player(&mut self.player_pos, KeyCode::D, 1.0, ctx, self.player_rect.w);
+        self.spawn_time += 1.0;
+        if self.spawn_time == 200.0 {
+            self.spawn_time = 0.0;
+            self.coconuts.push(coconut::new_coconut(ctx));
+        }
+        &self
+            .player
+            .move_player(KeyCode::A, -1.0, ctx, self.player.player_rect.w, SCALE);
+        &self
+            .player
+            .move_player(KeyCode::D, 1.0, ctx, self.player.player_rect.w, SCALE);
 
-        // if keyboard::is_key_pressed(ctx, keyboard::KeyCode::W) {
-        //     let player_image = graphics::Image::new(ctx, "/crab.png").unwrap();
-        //     self.sprite_batch.clear();
-        //     self.sprite_batch.set_image(player_image);
-        // }
-        // if keyboard::is_key_pressed(ctx, keyboard::KeyCode::S) {
-        //     let coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
-        //     self.sprite_batch.clear();
-        //     self.sprite_batch.set_image(coconut_image);
-        // }
+        for coconut in &mut self.coconuts {
+            coconut.move_coconut(ctx);
+        }
+
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::Color::BLACK);
         let draw_param = graphics::DrawParam::new();
-        let game_scale = glam::Vec2::new(5.0, 5.0);
+        let game_scale = glam::Vec2::new(SCALE, SCALE);
 
-        self.sprite_batch.add(draw_param);
         graphics::draw(
             ctx,
-            &self.sprite_batch,
-            draw_param.dest(self.player_pos).scale(game_scale),
+            &self.player.player_image,
+            draw_param.dest(self.player.player_pos).scale(game_scale),
         )?;
 
+        for coconut in &self.coconuts {
+            graphics::draw(
+                ctx,
+                &coconut.coconut_image,
+                draw_param.dest(coconut.coconut_pos).scale(game_scale),
+            )?;
+        }
         let player_mesh = graphics::Mesh::new_rectangle(
             ctx,
             graphics::DrawMode::stroke(1.0),
             graphics::Rect::new(
-                self.player_rect.x,
-                self.player_rect.y + 4.0,
-                self.player_rect.w,
-                self.player_rect.h - 5.0,
+                self.player.player_rect.x,
+                self.player.player_rect.y + 4.0,
+                self.player.player_rect.w,
+                self.player.player_rect.h - 5.0,
             ),
             graphics::Color::WHITE,
         )?;
@@ -98,7 +100,7 @@ impl event::EventHandler<ggez::GameError> for MainState {
         graphics::draw(
             ctx,
             &player_mesh,
-            draw_param.dest(self.player_pos).scale(game_scale),
+            draw_param.dest(self.player.player_pos).scale(game_scale),
         )?;
         graphics::present(ctx)?;
         Ok(())
