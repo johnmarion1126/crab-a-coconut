@@ -59,6 +59,11 @@ impl event::EventHandler<ggez::GameError> for MainState {
         &self
             .player
             .move_player(KeyCode::D, 1.0, ctx, self.player.player_rect.w, SCALE);
+
+        for coconut in &mut self.coconuts {
+            coconut.move_coconut(ctx);
+        }
+
         Ok(())
     }
 

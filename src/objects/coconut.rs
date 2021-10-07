@@ -3,12 +3,19 @@ use ggez::graphics;
 use ggez::Context;
 
 // Constants
-const COCONUT_SPEED: f32 = 300.0;
+const COCONUT_SPEED: f32 = 250.0;
 
 pub struct Coconut {
     pub coconut_image: graphics::Image,
     pub coconut_rect: graphics::Rect,
     pub coconut_pos: glam::Vec2,
+}
+
+impl Coconut {
+    pub fn move_coconut(&mut self, ctx: &mut Context) {
+        let dt = ggez::timer::delta(ctx).as_secs_f32();
+        self.coconut_pos.y += 1.0 * COCONUT_SPEED * dt;
+    }
 }
 
 pub fn new_coconut(ctx: &mut Context) -> Coconut {
