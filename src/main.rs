@@ -51,7 +51,8 @@ impl event::EventHandler<ggez::GameError> for MainState {
         self.spawn_time += 1.0;
         if self.spawn_time == 200.0 {
             self.spawn_time = 0.0;
-            self.coconuts.push(coconut::new_coconut(ctx));
+            self.coconuts
+                .push(coconut::new_coconut(ctx, self.SCREEN_WIDTH));
         }
         &self
             .player
