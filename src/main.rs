@@ -79,10 +79,39 @@ impl event::EventHandler<ggez::GameError> for MainState {
             draw_param.dest(self.player.player_pos).scale(game_scale),
         )?;
 
-        for coconut in &self.coconuts {
+        for coconut in &mut self.coconuts {
+            if coconut.coconut_pos.y >= self.player.player_pos.y
+                && coconut.coconut_pos.x
+                    < self.player.player_pos.x + (self.player.player_rect.w * SCALE)
+                && coconut.coconut_pos.x + (coconut.coconut_rect.w * SCALE)
+                    > self.player.player_pos.x
+            {
+                continue;
+                //TODO: REMOVE COCONUT FROM VEC
+                //TODO: ADD A POINT SYSTEM
+            }
+
             graphics::draw(
                 ctx,
                 &coconut.coconut_image,
+                draw_param.dest(coconut.coconut_pos).scale(game_scale),
+            )?;
+
+            let coconut_mesh = graphics::Mesh::new_rectangle(
+                ctx,
+                graphics::DrawMode::stroke(1.0),
+                graphics::Rect::new(
+                    coconut.coconut_rect.x,
+                    coconut.coconut_rect.y - 1.0,
+                    coconut.coconut_rect.w,
+                    coconut.coconut_rect.h - 6.0,
+                ),
+                graphics::Color::WHITE,
+            )?;
+
+            graphics::draw(
+                ctx,
+                &coconut_mesh,
                 draw_param.dest(coconut.coconut_pos).scale(game_scale),
             )?;
         }
