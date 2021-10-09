@@ -93,37 +93,35 @@ impl event::EventHandler<ggez::GameError> for MainState {
                     > self.player.player_pos.x
             {
                 coconut.is_destroyed = true;
+                self.player.player_score += 1;
             }
 
             if coconut.coconut_pos.y >= self.SCREEN_HEIGHT {
                 coconut.is_destroyed = true;
             }
+            graphics::draw(
+                ctx,
+                &coconut.coconut_image,
+                draw_param.dest(coconut.coconut_pos).scale(game_scale),
+            )?;
 
-            if coconut.is_destroyed == false {
-                graphics::draw(
-                    ctx,
-                    &coconut.coconut_image,
-                    draw_param.dest(coconut.coconut_pos).scale(game_scale),
-                )?;
+            let coconut_mesh = graphics::Mesh::new_rectangle(
+                ctx,
+                graphics::DrawMode::stroke(1.0),
+                graphics::Rect::new(
+                    coconut.coconut_rect.x,
+                    coconut.coconut_rect.y - 1.0,
+                    coconut.coconut_rect.w,
+                    coconut.coconut_rect.h - 6.0,
+                ),
+                graphics::Color::WHITE,
+            )?;
 
-                let coconut_mesh = graphics::Mesh::new_rectangle(
-                    ctx,
-                    graphics::DrawMode::stroke(1.0),
-                    graphics::Rect::new(
-                        coconut.coconut_rect.x,
-                        coconut.coconut_rect.y - 1.0,
-                        coconut.coconut_rect.w,
-                        coconut.coconut_rect.h - 6.0,
-                    ),
-                    graphics::Color::WHITE,
-                )?;
-
-                graphics::draw(
-                    ctx,
-                    &coconut_mesh,
-                    draw_param.dest(coconut.coconut_pos).scale(game_scale),
-                )?;
-            }
+            graphics::draw(
+                ctx,
+                &coconut_mesh,
+                draw_param.dest(coconut.coconut_pos).scale(game_scale),
+            )?;
         }
         let player_mesh = graphics::Mesh::new_rectangle(
             ctx,
@@ -142,6 +140,9 @@ impl event::EventHandler<ggez::GameError> for MainState {
             &player_mesh,
             draw_param.dest(self.player.player_pos).scale(game_scale),
         )?;
+
+        let score_text = graphics::Text::new(format!("Score: {}", self.player.player_score));
+        graphics::draw(ctx, &score_text, draw_param.dest(glam::Vec2::new(0.0, 0.0)))?;
         graphics::present(ctx)?;
         Ok(())
     }
