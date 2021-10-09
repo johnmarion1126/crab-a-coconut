@@ -48,12 +48,6 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        self.spawn_time += 1.0;
-        if self.spawn_time == 200.0 {
-            self.spawn_time = 0.0;
-            self.coconuts
-                .push(coconut::new_coconut(ctx, self.SCREEN_WIDTH, SCALE));
-        }
         &self
             .player
             .move_player(KeyCode::A, -1.0, ctx, self.player.player_rect.w, SCALE);
@@ -61,10 +55,20 @@ impl event::EventHandler<ggez::GameError> for MainState {
             .player
             .move_player(KeyCode::D, 1.0, ctx, self.player.player_rect.w, SCALE);
 
+        self.spawn_time += 1.0;
+        if self.spawn_time == 200.0 {
+            self.spawn_time = 0.0;
+            self.coconuts
+                .push(coconut::new_coconut(ctx, self.SCREEN_WIDTH, SCALE));
+        }
+
+        remove_coconut(&mut self.coconuts);
+
         for coconut in &mut self.coconuts {
             coconut.move_coconut(ctx);
         }
 
+        println!("{}", self.coconuts.len());
         Ok(())
     }
 
@@ -81,16 +85,20 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
         for coconut in &mut self.coconuts {
             if coconut.coconut_pos.y >= self.player.player_pos.y
+                && coconut.coconut_pos.y
+                    < self.player.player_pos.y + (self.player.player_rect.h * SCALE)
                 && coconut.coconut_pos.x
                     < self.player.player_pos.x + (self.player.player_rect.w * SCALE)
                 && coconut.coconut_pos.x + (coconut.coconut_rect.w * SCALE)
                     > self.player.player_pos.x
             {
-                continue;
-                //TODO: REMOVE COCONUT FROM VEC
-                //TODO: ADD A POINT SYSTEM
+                coconut.is_destroyed = true;
+                self.player.player_score += 1;
             }
 
+            if coconut.coconut_pos.y >= self.SCREEN_HEIGHT {
+                coconut.is_destroyed = true;
+            }
             graphics::draw(
                 ctx,
                 &coconut.coconut_image,
@@ -132,8 +140,21 @@ impl event::EventHandler<ggez::GameError> for MainState {
             &player_mesh,
             draw_param.dest(self.player.player_pos).scale(game_scale),
         )?;
+
+        let score_text = graphics::Text::new(format!("Score: {}", self.player.player_score));
+        graphics::draw(ctx, &score_text, draw_param.dest(glam::Vec2::new(0.0, 0.0)))?;
         graphics::present(ctx)?;
         Ok(())
+    }
+}
+
+fn remove_coconut(coconuts: &mut Vec<coconut::Coconut>) {
+    let mut index = 0;
+    while index < coconuts.len() {
+        if coconuts[index].is_destroyed {
+            coconuts.remove(index);
+        }
+        index += 1;
     }
 }
 

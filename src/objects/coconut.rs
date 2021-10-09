@@ -11,6 +11,7 @@ pub struct Coconut {
     pub coconut_image: graphics::Image,
     pub coconut_rect: graphics::Rect,
     pub coconut_pos: glam::Vec2,
+    pub is_destroyed: bool,
 }
 
 impl Coconut {
@@ -34,5 +35,6 @@ pub fn new_coconut(ctx: &mut Context, SCREEN_WIDTH: f32, game_scale: f32) -> Coc
             thread_rng().gen_range(0..RIGHT_LIMIT as i32) as f32,
             0.0 - coconut_rect.y,
         ),
+        is_destroyed: false,
     }
 }
