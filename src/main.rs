@@ -85,6 +85,8 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
         for coconut in &mut self.coconuts {
             if coconut.coconut_pos.y >= self.player.player_pos.y
+                && coconut.coconut_pos.y
+                    < self.player.player_pos.y + (self.player.player_rect.h * SCALE)
                 && coconut.coconut_pos.x
                     < self.player.player_pos.x + (self.player.player_rect.w * SCALE)
                 && coconut.coconut_pos.x + (coconut.coconut_rect.w * SCALE)
