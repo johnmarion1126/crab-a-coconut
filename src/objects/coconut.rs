@@ -17,7 +17,7 @@ pub struct Coconut {
 impl Coconut {
     pub fn move_coconut(&mut self, ctx: &mut Context) {
         let dt = ggez::timer::delta(ctx).as_secs_f32();
-        self.coconut_pos.y += 1.0 * COCONUT_SPEED * dt;
+        self.coconut_pos.y += COCONUT_SPEED * dt;
     }
 }
 
@@ -29,8 +29,8 @@ pub fn new_coconut(ctx: &mut Context, SCREEN_WIDTH: f32, game_scale: f32) -> Coc
     let RIGHT_LIMIT = SCREEN_WIDTH - (coconut_rect.w * game_scale);
 
     Coconut {
-        coconut_image: coconut_image,
-        coconut_rect: coconut_rect,
+        coconut_image,
+        coconut_rect,
         coconut_pos: glam::Vec2::new(
             thread_rng().gen_range(0..RIGHT_LIMIT as i32) as f32,
             0.0 - coconut_rect.y,

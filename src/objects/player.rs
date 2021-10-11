@@ -61,9 +61,9 @@ pub fn new_player(
     );
 
     Player {
-        player_image: player_image,
-        player_rect: player_rect,
-        player_pos: player_pos,
+        player_image,
+        player_rect,
+        player_pos,
         player_score: 0,
     }
 }

@@ -68,7 +68,6 @@ impl event::EventHandler<ggez::GameError> for MainState {
             coconut.move_coconut(ctx);
         }
 
-        println!("{}", self.coconuts.len());
         Ok(())
     }
 
