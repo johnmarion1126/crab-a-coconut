@@ -7,13 +7,10 @@ use std::env;
 use std::path;
 
 // Modules
-#[path = "./modules/coconut.rs"]
-mod coconut;
-#[path = "./modules/object.rs"]
-mod object;
-use object::Object;
-#[path = "./modules/player.rs"]
-mod player;
+mod objects;
+use objects::coconut;
+use objects::object::Object;
+use objects::player;
 
 // Constants
 const BOTTOM_PADDING: f32 = 100.0;

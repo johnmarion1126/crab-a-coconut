@@ -1,5 +1,5 @@
 // Dependencies
-use crate::object::Object;
+use super::object::Object;
 use ggez::graphics;
 use ggez::Context;
 use rand::prelude::*;
