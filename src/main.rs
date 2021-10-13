@@ -11,6 +11,10 @@ mod objects;
 use objects::coconut;
 use objects::object::Object;
 use objects::player;
+use objects::rock;
+
+// Types
+type ObjectT = Box<dyn Object>;
 
 // Constants
 const BOTTOM_PADDING: f32 = 100.0;
@@ -18,7 +22,7 @@ const SCALE: f32 = 5.0;
 
 struct MainState {
     spawn_time: f32,
-    coconuts: Vec<coconut::Coconut>,
+    objects: Vec<ObjectT>,
     player: player::Player,
     SCREEN_HEIGHT: f32,
     SCREEN_WIDTH: f32,
@@ -36,7 +40,7 @@ impl MainState {
 
         MainState {
             spawn_time: 0.0,
-            coconuts: vec![],
+            objects: vec![],
             player: player,
             SCREEN_HEIGHT: SCREEN_HEIGHT,
             SCREEN_WIDTH: SCREEN_WIDTH,
@@ -56,16 +60,20 @@ impl event::EventHandler<ggez::GameError> for MainState {
             .move_player(KeyCode::D, 1.0, ctx, self.player.player_rect.w, SCALE);
 
         self.spawn_time += 1.0;
+        if self.spawn_time % 100.0 == 0.0 {
+            self.objects
+                .push(Box::new(rock::new(ctx, self.SCREEN_WIDTH, SCALE)));
+        }
         if self.spawn_time == 200.0 {
             self.spawn_time = 0.0;
-            self.coconuts
-                .push(coconut::Coconut::new(ctx, self.SCREEN_WIDTH, SCALE));
+            self.objects
+                .push(Box::new(coconut::new(ctx, self.SCREEN_WIDTH, SCALE)));
         }
 
-        remove_coconut(&mut self.coconuts);
+        remove_objects(&mut self.objects);
 
-        for coconut in &mut self.coconuts {
-            coconut.move_object(ctx);
+        for object in &mut self.objects {
+            object.move_object(ctx);
         }
 
         Ok(())
@@ -82,63 +90,28 @@ impl event::EventHandler<ggez::GameError> for MainState {
             draw_param.dest(self.player.player_pos).scale(game_scale),
         )?;
 
-        for coconut in &mut self.coconuts {
-            if coconut.coconut_pos.y >= self.player.player_pos.y
-                && coconut.coconut_pos.y
+        for object in &mut self.objects {
+            if object.get_position().y >= self.player.player_pos.y
+                && object.get_position().y
                     < self.player.player_pos.y + (self.player.player_rect.h * SCALE)
-                && coconut.coconut_pos.x
+                && object.get_position().x
                     < self.player.player_pos.x + (self.player.player_rect.w * SCALE)
-                && coconut.coconut_pos.x + (coconut.coconut_rect.w * SCALE)
+                && object.get_position().x + (object.get_rect().w * SCALE)
                     > self.player.player_pos.x
             {
-                coconut.is_destroyed = true;
+                object.destroy_object();
                 self.player.player_score += 1;
             }
 
-            if coconut.coconut_pos.y >= self.SCREEN_HEIGHT {
-                coconut.is_destroyed = true;
+            if object.get_position().y >= self.SCREEN_HEIGHT {
+                object.destroy_object()
             }
             graphics::draw(
                 ctx,
-                &coconut.coconut_image,
-                draw_param.dest(coconut.coconut_pos).scale(game_scale),
-            )?;
-
-            let coconut_mesh = graphics::Mesh::new_rectangle(
-                ctx,
-                graphics::DrawMode::stroke(1.0),
-                graphics::Rect::new(
-                    coconut.coconut_rect.x,
-                    coconut.coconut_rect.y - 1.0,
-                    coconut.coconut_rect.w,
-                    coconut.coconut_rect.h - 6.0,
-                ),
-                graphics::Color::WHITE,
-            )?;
-
-            graphics::draw(
-                ctx,
-                &coconut_mesh,
-                draw_param.dest(coconut.coconut_pos).scale(game_scale),
+                &object.get_image(),
+                draw_param.dest(object.get_position()).scale(game_scale),
             )?;
         }
-        let player_mesh = graphics::Mesh::new_rectangle(
-            ctx,
-            graphics::DrawMode::stroke(1.0),
-            graphics::Rect::new(
-                self.player.player_rect.x,
-                self.player.player_rect.y + 4.0,
-                self.player.player_rect.w,
-                self.player.player_rect.h - 5.0,
-            ),
-            graphics::Color::WHITE,
-        )?;
-
-        graphics::draw(
-            ctx,
-            &player_mesh,
-            draw_param.dest(self.player.player_pos).scale(game_scale),
-        )?;
 
         let score_text = graphics::Text::new(format!("Score: {}", self.player.player_score));
         graphics::draw(ctx, &score_text, draw_param.dest(glam::Vec2::new(0.0, 0.0)))?;
@@ -147,11 +120,11 @@ impl event::EventHandler<ggez::GameError> for MainState {
     }
 }
 
-fn remove_coconut(coconuts: &mut Vec<coconut::Coconut>) {
+fn remove_objects(objects: &mut Vec<ObjectT>) {
     let mut index = 0;
-    while index < coconuts.len() {
-        if coconuts[index].is_destroyed {
-            coconuts.remove(index);
+    while index < objects.len() {
+        if objects[index].get_status() {
+            objects.remove(index);
         }
         index += 1;
     }
