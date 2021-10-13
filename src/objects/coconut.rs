@@ -1,4 +1,5 @@
 // Dependencies
+use super::object::Object;
 use ggez::graphics;
 use ggez::Context;
 use rand::prelude::*;
@@ -11,30 +12,39 @@ pub struct Coconut {
     pub coconut_image: graphics::Image,
     pub coconut_rect: graphics::Rect,
     pub coconut_pos: glam::Vec2,
+    pub coconut_speed: f32,
     pub is_destroyed: bool,
 }
 
-impl Coconut {
-    pub fn move_coconut(&mut self, ctx: &mut Context) {
-        let dt = ggez::timer::delta(ctx).as_secs_f32();
-        self.coconut_pos.y += 1.0 * COCONUT_SPEED * dt;
+impl Object for Coconut {
+    fn new(ctx: &mut Context, SCREEN_WIDTH: f32, SCALE: f32) -> Coconut {
+        let mut coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
+        let coconut_rect = coconut_image.dimensions();
+        coconut_image.set_filter(graphics::FilterMode::Nearest);
+
+        let RIGHT_LIMIT = SCREEN_WIDTH - (coconut_rect.w * SCALE);
+
+        Coconut {
+            coconut_image,
+            coconut_rect,
+            coconut_pos: glam::Vec2::new(
+                thread_rng().gen_range(0..RIGHT_LIMIT as i32) as f32,
+                0.0 - coconut_rect.y,
+            ),
+            coconut_speed: COCONUT_SPEED,
+            is_destroyed: false,
+        }
     }
-}
 
-pub fn new_coconut(ctx: &mut Context, SCREEN_WIDTH: f32, game_scale: f32) -> Coconut {
-    let mut coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
-    let coconut_rect = coconut_image.dimensions();
-    coconut_image.set_filter(graphics::FilterMode::Nearest);
+    fn get_position_y(&self) -> f32 {
+        self.coconut_pos.y
+    }
 
-    let RIGHT_LIMIT = SCREEN_WIDTH - (coconut_rect.w * game_scale);
+    fn set_position_y(&mut self, pos_y: f32) {
+        self.coconut_pos.y = pos_y;
+    }
 
-    Coconut {
-        coconut_image: coconut_image,
-        coconut_rect: coconut_rect,
-        coconut_pos: glam::Vec2::new(
-            thread_rng().gen_range(0..RIGHT_LIMIT as i32) as f32,
-            0.0 - coconut_rect.y,
-        ),
-        is_destroyed: false,
+    fn get_speed(&self) -> f32 {
+        self.coconut_speed
     }
 }

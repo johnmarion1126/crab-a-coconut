@@ -6,11 +6,11 @@ use ggez::{Context, GameResult};
 use std::env;
 use std::path;
 
-// Objects
-#[path = "./objects/coconut.rs"]
-mod coconut;
-#[path = "./objects/player.rs"]
-mod player;
+// Modules
+mod objects;
+use objects::coconut;
+use objects::object::Object;
+use objects::player;
 
 // Constants
 const BOTTOM_PADDING: f32 = 100.0;
@@ -59,16 +59,15 @@ impl event::EventHandler<ggez::GameError> for MainState {
         if self.spawn_time == 200.0 {
             self.spawn_time = 0.0;
             self.coconuts
-                .push(coconut::new_coconut(ctx, self.SCREEN_WIDTH, SCALE));
+                .push(coconut::Coconut::new(ctx, self.SCREEN_WIDTH, SCALE));
         }
 
         remove_coconut(&mut self.coconuts);
 
         for coconut in &mut self.coconuts {
-            coconut.move_coconut(ctx);
+            coconut.move_object(ctx);
         }
 
-        println!("{}", self.coconuts.len());
         Ok(())
     }
 
