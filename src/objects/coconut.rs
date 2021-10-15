@@ -14,37 +14,65 @@ pub struct Coconut {
     pub coconut_pos: glam::Vec2,
     pub coconut_speed: f32,
     pub is_destroyed: bool,
+    pub damage: i32,
+    pub points: i32,
 }
 
 impl Object for Coconut {
-    fn new(ctx: &mut Context, SCREEN_WIDTH: f32, SCALE: f32) -> Coconut {
-        let mut coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
-        let coconut_rect = coconut_image.dimensions();
-        coconut_image.set_filter(graphics::FilterMode::Nearest);
-
-        let RIGHT_LIMIT = SCREEN_WIDTH - (coconut_rect.w * SCALE);
-
-        Coconut {
-            coconut_image,
-            coconut_rect,
-            coconut_pos: glam::Vec2::new(
-                thread_rng().gen_range(0..RIGHT_LIMIT as i32) as f32,
-                0.0 - coconut_rect.y,
-            ),
-            coconut_speed: COCONUT_SPEED,
-            is_destroyed: false,
-        }
+    fn get_image(&self) -> graphics::Image {
+        self.coconut_image.clone()
     }
 
-    fn get_position_y(&self) -> f32 {
-        self.coconut_pos.y
+    fn get_rect(&self) -> graphics::Rect {
+        self.coconut_rect
+    }
+
+    fn get_speed(&self) -> f32 {
+        self.coconut_speed
+    }
+
+    fn get_status(&self) -> bool {
+        self.is_destroyed
+    }
+
+    fn destroy_object(&mut self) {
+        self.is_destroyed = true;
+    }
+
+    fn get_position(&self) -> glam::Vec2 {
+        self.coconut_pos
     }
 
     fn set_position_y(&mut self, pos_y: f32) {
         self.coconut_pos.y = pos_y;
     }
 
-    fn get_speed(&self) -> f32 {
-        self.coconut_speed
+    fn get_damage(&self) -> i32 {
+        self.damage
+    }
+
+    fn get_points(&self) -> i32 {
+        self.points
+    }
+}
+
+pub fn new(ctx: &mut Context, SCREEN_WIDTH: f32, SCALE: f32) -> Coconut {
+    let mut coconut_image = graphics::Image::new(ctx, "/coconut.png").unwrap();
+    let coconut_rect = coconut_image.dimensions();
+    coconut_image.set_filter(graphics::FilterMode::Nearest);
+
+    let RIGHT_LIMIT = SCREEN_WIDTH - (coconut_rect.w * SCALE);
+
+    Coconut {
+        coconut_image,
+        coconut_rect,
+        coconut_pos: glam::Vec2::new(
+            thread_rng().gen_range(0..RIGHT_LIMIT as i32) as f32,
+            0.0 - coconut_rect.y,
+        ),
+        coconut_speed: COCONUT_SPEED,
+        is_destroyed: false,
+        damage: 0,
+        points: 100,
     }
 }

@@ -11,6 +11,7 @@ pub struct Player {
     pub player_rect: graphics::Rect,
     pub player_pos: glam::Vec2,
     pub player_score: i32,
+    pub player_hp: i32,
 }
 
 impl Player {
@@ -65,5 +66,6 @@ pub fn new_player(
         player_rect,
         player_pos,
         player_score: 0,
+        player_hp: 5,
     }
 }
