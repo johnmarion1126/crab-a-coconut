@@ -115,6 +115,13 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
         let score_text = graphics::Text::new(format!("Score: {}", self.player.player_score));
         graphics::draw(ctx, &score_text, draw_param.dest(glam::Vec2::new(0.0, 0.0)))?;
+        let hp_text = graphics::Text::new(format!("HP: {}", self.player.player_hp));
+        let hp_rect = hp_text.dimensions(ctx);
+        graphics::draw(
+            ctx,
+            &hp_text,
+            draw_param.dest(glam::Vec2::new(self.SCREEN_WIDTH - hp_rect.w, 0.0)),
+        )?;
         graphics::present(ctx)?;
         Ok(())
     }
