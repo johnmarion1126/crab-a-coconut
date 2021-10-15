@@ -14,6 +14,8 @@ pub struct Coconut {
     pub coconut_pos: glam::Vec2,
     pub coconut_speed: f32,
     pub is_destroyed: bool,
+    pub damage: i32,
+    pub points: i32,
 }
 
 impl Object for Coconut {
@@ -44,6 +46,14 @@ impl Object for Coconut {
     fn set_position_y(&mut self, pos_y: f32) {
         self.coconut_pos.y = pos_y;
     }
+
+    fn get_damage(&self) -> i32 {
+        self.damage
+    }
+
+    fn get_points(&self) -> i32 {
+        self.points
+    }
 }
 
 pub fn new(ctx: &mut Context, SCREEN_WIDTH: f32, SCALE: f32) -> Coconut {
@@ -62,5 +72,7 @@ pub fn new(ctx: &mut Context, SCREEN_WIDTH: f32, SCALE: f32) -> Coconut {
         ),
         coconut_speed: COCONUT_SPEED,
         is_destroyed: false,
+        damage: 0,
+        points: 100,
     }
 }

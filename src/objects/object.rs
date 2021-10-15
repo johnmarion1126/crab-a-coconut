@@ -17,6 +17,10 @@ pub trait Object {
 
     fn set_position_y(&mut self, pos_y: f32);
 
+    fn get_damage(&self) -> i32;
+
+    fn get_points(&self) -> i32;
+
     fn move_object(&mut self, ctx: &mut Context) {
         let dt = ggez::timer::delta(ctx).as_secs_f32();
         let mut pos_y = self.get_position().y;

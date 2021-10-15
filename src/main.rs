@@ -100,7 +100,8 @@ impl event::EventHandler<ggez::GameError> for MainState {
                     > self.player.player_pos.x
             {
                 object.destroy_object();
-                self.player.player_score += 1;
+                self.player.player_score += object.get_points();
+                self.player.player_hp -= object.get_damage();
             }
 
             if object.get_position().y >= self.SCREEN_HEIGHT {
