@@ -1,7 +1,7 @@
 // Dependencies
 use ggez::event;
 use ggez::graphics;
-use ggez::input::keyboard::KeyCode;
+use ggez::input::keyboard::{self, KeyCode};
 use ggez::{Context, GameResult};
 use std::env;
 use std::path;
@@ -54,6 +54,20 @@ impl MainState {
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
+        if self.is_game_over {
+            if keyboard::is_key_pressed(ctx, KeyCode::R) {
+                self.is_game_over = false;
+                self.player = player::new_player(
+                    ctx,
+                    self.SCREEN_HEIGHT,
+                    self.SCREEN_WIDTH_HALF,
+                    BOTTOM_PADDING,
+                    SCALE,
+                );
+                self.objects = vec![];
+            }
+            return Ok(());
+        }
         &self
             .player
             .move_player(KeyCode::A, -1.0, ctx, self.player.player_rect.w, SCALE);
@@ -86,9 +100,9 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(SCALE, SCALE);
 
-        if self.is_game_over {
-            println!("Game Over!");
-        }
+        // if self.is_game_over {
+        //     println!("Game Over!");
+        // }
 
         graphics::draw(
             ctx,
