@@ -100,9 +100,20 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(SCALE, SCALE);
 
-        // if self.is_game_over {
-        //     println!("Game Over!");
-        // }
+        if self.is_game_over {
+            let game_over_text = graphics::Text::new("Game over. Press r to try again.");
+            let game_over_rect = game_over_text.dimensions(ctx);
+            graphics::draw(
+                ctx,
+                &game_over_text,
+                draw_param.dest(glam::Vec2::new(
+                    self.SCREEN_WIDTH_HALF - game_over_rect.w / 2.0,
+                    self.SCREEN_HEIGHT_HALF,
+                )),
+            )?;
+            graphics::present(ctx)?;
+            return Ok(());
+        }
 
         graphics::draw(
             ctx,
