@@ -1,7 +1,7 @@
 // Dependencies
 use ggez::event;
 use ggez::graphics;
-use ggez::input::keyboard::KeyCode;
+use ggez::input::keyboard::{self, KeyCode};
 use ggez::{Context, GameResult};
 use std::env;
 use std::path;
@@ -28,6 +28,7 @@ struct MainState {
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
     SCREEN_WIDTH_HALF: f32,
+    is_game_over: bool,
 }
 
 impl MainState {
@@ -46,12 +47,27 @@ impl MainState {
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
             SCREEN_WIDTH_HALF: SCREEN_WIDTH_HALF,
+            is_game_over: false,
         }
     }
 }
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
+        if self.is_game_over {
+            if keyboard::is_key_pressed(ctx, KeyCode::R) {
+                self.is_game_over = false;
+                self.player = player::new_player(
+                    ctx,
+                    self.SCREEN_HEIGHT,
+                    self.SCREEN_WIDTH_HALF,
+                    BOTTOM_PADDING,
+                    SCALE,
+                );
+                self.objects = vec![];
+            }
+            return Ok(());
+        }
         &self
             .player
             .move_player(KeyCode::A, -1.0, ctx, self.player.player_rect.w, SCALE);
@@ -84,6 +100,21 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(SCALE, SCALE);
 
+        if self.is_game_over {
+            let game_over_text = graphics::Text::new("Game over. Press r to try again.");
+            let game_over_rect = game_over_text.dimensions(ctx);
+            graphics::draw(
+                ctx,
+                &game_over_text,
+                draw_param.dest(glam::Vec2::new(
+                    self.SCREEN_WIDTH_HALF - game_over_rect.w / 2.0,
+                    self.SCREEN_HEIGHT_HALF,
+                )),
+            )?;
+            graphics::present(ctx)?;
+            return Ok(());
+        }
+
         graphics::draw(
             ctx,
             &self.player.player_image,
@@ -101,7 +132,12 @@ impl event::EventHandler<ggez::GameError> for MainState {
             {
                 object.destroy_object();
                 self.player.player_score += object.get_points();
-                self.player.player_hp -= object.get_damage();
+                if self.player.player_hp != 0 {
+                    self.player.player_hp -= object.get_damage();
+                }
+                if self.player.player_hp == 0 {
+                    self.is_game_over = true;
+                }
             }
 
             if object.get_position().y >= self.SCREEN_HEIGHT {
