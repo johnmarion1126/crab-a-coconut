@@ -28,6 +28,7 @@ struct MainState {
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
     SCREEN_WIDTH_HALF: f32,
+    is_game_over: bool,
 }
 
 impl MainState {
@@ -46,6 +47,7 @@ impl MainState {
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
             SCREEN_WIDTH_HALF: SCREEN_WIDTH_HALF,
+            is_game_over: false,
         }
     }
 }
@@ -84,6 +86,10 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(SCALE, SCALE);
 
+        if self.is_game_over {
+            println!("Game Over!");
+        }
+
         graphics::draw(
             ctx,
             &self.player.player_image,
@@ -101,7 +107,12 @@ impl event::EventHandler<ggez::GameError> for MainState {
             {
                 object.destroy_object();
                 self.player.player_score += object.get_points();
-                self.player.player_hp -= object.get_damage();
+                if self.player.player_hp != 0 {
+                    self.player.player_hp -= object.get_damage();
+                }
+                if self.player.player_hp == 0 {
+                    self.is_game_over = true;
+                }
             }
 
             if object.get_position().y >= self.SCREEN_HEIGHT {
