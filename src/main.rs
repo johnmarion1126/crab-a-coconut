@@ -109,7 +109,7 @@ impl event::EventHandler<ggez::GameError> for MainState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        graphics::clear(ctx, graphics::Color::BLACK);
+        graphics::clear(ctx, graphics::Color::WHITE);
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(SCALE, SCALE);
 
@@ -119,17 +119,17 @@ impl event::EventHandler<ggez::GameError> for MainState {
         graphics::draw(
             ctx,
             &background_image,
-            draw_param
-                .dest(glam::Vec2::new(
-                    0.0, // self.SCREEN_WIDTH_HALF - background_rect.w,
-                    0.0, //self.SCREEN_HEIGHT_HALF - background_rect.h,
-                ))
-                .scale(game_scale),
+            draw_param.dest(glam::Vec2::new(0.0, 0.0)).scale(game_scale),
         )?;
 
         match self.game_state {
             GameState::GameOver => {
-                let game_over_text = graphics::Text::new("     Game over\nPress r to try again");
+                let game_over_text = graphics::Text::new(graphics::TextFragment {
+                    text: "     Game over\nPress r to try again".to_string(),
+                    color: Some(graphics::Color::BLACK),
+                    font: Some(graphics::Font::default()),
+                    scale: Some(graphics::PxScale::from(30.0)),
+                });
                 let game_over_rect = game_over_text.dimensions(ctx);
                 graphics::draw(
                     ctx,
@@ -176,10 +176,19 @@ impl event::EventHandler<ggez::GameError> for MainState {
                     )?;
                 }
 
-                let score_text =
-                    graphics::Text::new(format!("Score: {}", self.player.player_score));
+                let score_text = graphics::Text::new(graphics::TextFragment {
+                    text: (format!("Score: {}", self.player.player_score)),
+                    color: Some(graphics::Color::BLACK),
+                    font: Some(graphics::Font::default()),
+                    scale: Some(graphics::PxScale::from(20.0)),
+                });
                 graphics::draw(ctx, &score_text, draw_param.dest(glam::Vec2::new(0.0, 0.0)))?;
-                let hp_text = graphics::Text::new(format!("HP: {}", self.player.player_hp));
+                let hp_text = graphics::Text::new(graphics::TextFragment {
+                    text: (format!("HP: {}", self.player.player_hp)),
+                    color: Some(graphics::Color::BLACK),
+                    font: Some(graphics::Font::default()),
+                    scale: Some(graphics::PxScale::from(20.0)),
+                });
                 let hp_rect = hp_text.dimensions(ctx);
                 graphics::draw(
                     ctx,
@@ -188,14 +197,19 @@ impl event::EventHandler<ggez::GameError> for MainState {
                 )?;
             }
             GameState::StartScreen => {
-                let start_text = graphics::Text::new(" Crab-A-Coconut\nPress z to start");
+                let start_text = graphics::Text::new(graphics::TextFragment {
+                    text: " Crab-A-Coconut\nPress z to start".to_string(),
+                    color: Some(graphics::Color::BLACK),
+                    font: Some(graphics::Font::default()),
+                    scale: Some(graphics::PxScale::from(40.0)),
+                });
                 let start_rect = start_text.dimensions(ctx);
                 graphics::draw(
                     ctx,
                     &start_text,
                     draw_param.dest(glam::Vec2::new(
                         self.SCREEN_WIDTH_HALF - start_rect.w / 2.0,
-                        self.SCREEN_HEIGHT_HALF,
+                        self.SCREEN_HEIGHT_HALF - start_rect.h / 2.0,
                     )),
                 )?;
             }
