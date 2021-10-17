@@ -20,6 +20,12 @@ type ObjectT = Box<dyn Object>;
 const BOTTOM_PADDING: f32 = 100.0;
 const SCALE: f32 = 5.0;
 
+enum GameState {
+    InGame,
+    GameOver,
+    StartScreen,
+}
+
 struct MainState {
     spawn_time: f32,
     objects: Vec<ObjectT>,
@@ -28,7 +34,7 @@ struct MainState {
     SCREEN_WIDTH: f32,
     SCREEN_HEIGHT_HALF: f32,
     SCREEN_WIDTH_HALF: f32,
-    is_game_over: bool,
+    game_state: GameState,
 }
 
 impl MainState {
@@ -47,52 +53,57 @@ impl MainState {
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
             SCREEN_WIDTH_HALF: SCREEN_WIDTH_HALF,
-            is_game_over: false,
+            game_state: GameState::InGame,
         }
     }
 }
 
 impl event::EventHandler<ggez::GameError> for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        if self.is_game_over {
-            if keyboard::is_key_pressed(ctx, KeyCode::R) {
-                self.is_game_over = false;
-                self.player = player::new_player(
-                    ctx,
-                    self.SCREEN_HEIGHT,
-                    self.SCREEN_WIDTH_HALF,
-                    BOTTOM_PADDING,
-                    SCALE,
-                );
-                self.objects = vec![];
+        match self.game_state {
+            GameState::GameOver => {
+                if keyboard::is_key_pressed(ctx, KeyCode::R) {
+                    self.game_state = GameState::InGame;
+                    self.player = player::new_player(
+                        ctx,
+                        self.SCREEN_HEIGHT,
+                        self.SCREEN_WIDTH_HALF,
+                        BOTTOM_PADDING,
+                        SCALE,
+                    );
+                    self.objects = vec![];
+                }
+                Ok(())
             }
-            return Ok(());
-        }
-        &self
-            .player
-            .move_player(KeyCode::A, -1.0, ctx, self.player.player_rect.w, SCALE);
-        &self
-            .player
-            .move_player(KeyCode::D, 1.0, ctx, self.player.player_rect.w, SCALE);
+            GameState::InGame => {
+                &self
+                    .player
+                    .move_player(KeyCode::A, -1.0, ctx, self.player.player_rect.w, SCALE);
+                &self
+                    .player
+                    .move_player(KeyCode::D, 1.0, ctx, self.player.player_rect.w, SCALE);
 
-        self.spawn_time += 1.0;
-        if self.spawn_time % 100.0 == 0.0 {
-            self.objects
-                .push(Box::new(rock::new(ctx, self.SCREEN_WIDTH, SCALE)));
-        }
-        if self.spawn_time == 200.0 {
-            self.spawn_time = 0.0;
-            self.objects
-                .push(Box::new(coconut::new(ctx, self.SCREEN_WIDTH, SCALE)));
-        }
+                self.spawn_time += 1.0;
+                if self.spawn_time % 100.0 == 0.0 {
+                    self.objects
+                        .push(Box::new(rock::new(ctx, self.SCREEN_WIDTH, SCALE)));
+                }
+                if self.spawn_time == 200.0 {
+                    self.spawn_time = 0.0;
+                    self.objects
+                        .push(Box::new(coconut::new(ctx, self.SCREEN_WIDTH, SCALE)));
+                }
 
-        remove_objects(&mut self.objects);
+                remove_objects(&mut self.objects);
 
-        for object in &mut self.objects {
-            object.move_object(ctx);
+                for object in &mut self.objects {
+                    object.move_object(ctx);
+                }
+
+                Ok(())
+            }
+            _ => Ok(()),
         }
-
-        Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
@@ -100,67 +111,72 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(SCALE, SCALE);
 
-        if self.is_game_over {
-            let game_over_text = graphics::Text::new("Game over. Press r to try again.");
-            let game_over_rect = game_over_text.dimensions(ctx);
-            graphics::draw(
-                ctx,
-                &game_over_text,
-                draw_param.dest(glam::Vec2::new(
-                    self.SCREEN_WIDTH_HALF - game_over_rect.w / 2.0,
-                    self.SCREEN_HEIGHT_HALF,
-                )),
-            )?;
-            graphics::present(ctx)?;
-            return Ok(());
-        }
-
-        graphics::draw(
-            ctx,
-            &self.player.player_image,
-            draw_param.dest(self.player.player_pos).scale(game_scale),
-        )?;
-
-        for object in &mut self.objects {
-            if object.get_position().y >= self.player.player_pos.y
-                && object.get_position().y
-                    < self.player.player_pos.y + (self.player.player_rect.h * SCALE)
-                && object.get_position().x
-                    < self.player.player_pos.x + (self.player.player_rect.w * SCALE)
-                && object.get_position().x + (object.get_rect().w * SCALE)
-                    > self.player.player_pos.x
-            {
-                object.destroy_object();
-                self.player.player_score += object.get_points();
-                if self.player.player_hp != 0 {
-                    self.player.player_hp -= object.get_damage();
-                }
-                if self.player.player_hp == 0 {
-                    self.is_game_over = true;
-                }
+        match self.game_state {
+            GameState::GameOver => {
+                let game_over_text = graphics::Text::new("Game over. Press r to try again.");
+                let game_over_rect = game_over_text.dimensions(ctx);
+                graphics::draw(
+                    ctx,
+                    &game_over_text,
+                    draw_param.dest(glam::Vec2::new(
+                        self.SCREEN_WIDTH_HALF - game_over_rect.w / 2.0,
+                        self.SCREEN_HEIGHT_HALF,
+                    )),
+                )?;
+                graphics::present(ctx)?;
+                Ok(())
             }
+            GameState::InGame => {
+                graphics::draw(
+                    ctx,
+                    &self.player.player_image,
+                    draw_param.dest(self.player.player_pos).scale(game_scale),
+                )?;
 
-            if object.get_position().y >= self.SCREEN_HEIGHT {
-                object.destroy_object()
+                for object in &mut self.objects {
+                    if object.get_position().y >= self.player.player_pos.y
+                        && object.get_position().y
+                            < self.player.player_pos.y + (self.player.player_rect.h * SCALE)
+                        && object.get_position().x
+                            < self.player.player_pos.x + (self.player.player_rect.w * SCALE)
+                        && object.get_position().x + (object.get_rect().w * SCALE)
+                            > self.player.player_pos.x
+                    {
+                        object.destroy_object();
+                        self.player.player_score += object.get_points();
+                        if self.player.player_hp != 0 {
+                            self.player.player_hp -= object.get_damage();
+                        }
+                        if self.player.player_hp == 0 {
+                            self.game_state = GameState::GameOver;
+                        }
+                    }
+
+                    if object.get_position().y >= self.SCREEN_HEIGHT {
+                        object.destroy_object()
+                    }
+                    graphics::draw(
+                        ctx,
+                        &object.get_image(),
+                        draw_param.dest(object.get_position()).scale(game_scale),
+                    )?;
+                }
+
+                let score_text =
+                    graphics::Text::new(format!("Score: {}", self.player.player_score));
+                graphics::draw(ctx, &score_text, draw_param.dest(glam::Vec2::new(0.0, 0.0)))?;
+                let hp_text = graphics::Text::new(format!("HP: {}", self.player.player_hp));
+                let hp_rect = hp_text.dimensions(ctx);
+                graphics::draw(
+                    ctx,
+                    &hp_text,
+                    draw_param.dest(glam::Vec2::new(self.SCREEN_WIDTH - hp_rect.w, 0.0)),
+                )?;
+                graphics::present(ctx)?;
+                Ok(())
             }
-            graphics::draw(
-                ctx,
-                &object.get_image(),
-                draw_param.dest(object.get_position()).scale(game_scale),
-            )?;
+            _ => Ok(()),
         }
-
-        let score_text = graphics::Text::new(format!("Score: {}", self.player.player_score));
-        graphics::draw(ctx, &score_text, draw_param.dest(glam::Vec2::new(0.0, 0.0)))?;
-        let hp_text = graphics::Text::new(format!("HP: {}", self.player.player_hp));
-        let hp_rect = hp_text.dimensions(ctx);
-        graphics::draw(
-            ctx,
-            &hp_text,
-            draw_param.dest(glam::Vec2::new(self.SCREEN_WIDTH - hp_rect.w, 0.0)),
-        )?;
-        graphics::present(ctx)?;
-        Ok(())
     }
 }
 
