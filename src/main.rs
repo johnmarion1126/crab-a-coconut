@@ -113,6 +113,20 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let draw_param = graphics::DrawParam::new();
         let game_scale = glam::Vec2::new(SCALE, SCALE);
 
+        let mut background_image = graphics::Image::new(ctx, "/beach.png").unwrap();
+        let background_rect = background_image.dimensions();
+        background_image.set_filter(graphics::FilterMode::Nearest);
+        graphics::draw(
+            ctx,
+            &background_image,
+            draw_param
+                .dest(glam::Vec2::new(
+                    0.0, // self.SCREEN_WIDTH_HALF - background_rect.w,
+                    0.0, //self.SCREEN_HEIGHT_HALF - background_rect.h,
+                ))
+                .scale(game_scale),
+        )?;
+
         match self.game_state {
             GameState::GameOver => {
                 let game_over_text = graphics::Text::new("     Game over\nPress r to try again");
