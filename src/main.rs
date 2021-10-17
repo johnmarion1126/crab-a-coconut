@@ -53,7 +53,7 @@ impl MainState {
             SCREEN_WIDTH: SCREEN_WIDTH,
             SCREEN_HEIGHT_HALF: SCREEN_HEIGHT_HALF,
             SCREEN_WIDTH_HALF: SCREEN_WIDTH_HALF,
-            game_state: GameState::InGame,
+            game_state: GameState::StartScreen,
         }
     }
 }
@@ -73,7 +73,6 @@ impl event::EventHandler<ggez::GameError> for MainState {
                     );
                     self.objects = vec![];
                 }
-                Ok(())
             }
             GameState::InGame => {
                 &self
@@ -99,11 +98,14 @@ impl event::EventHandler<ggez::GameError> for MainState {
                 for object in &mut self.objects {
                     object.move_object(ctx);
                 }
-
-                Ok(())
             }
-            _ => Ok(()),
+            GameState::StartScreen => {
+                if keyboard::is_key_pressed(ctx, KeyCode::Z) {
+                    self.game_state = GameState::InGame;
+                }
+            }
         }
+        Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
@@ -113,7 +115,7 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
         match self.game_state {
             GameState::GameOver => {
-                let game_over_text = graphics::Text::new("Game over. Press r to try again.");
+                let game_over_text = graphics::Text::new("     Game over\nPress r to try again");
                 let game_over_rect = game_over_text.dimensions(ctx);
                 graphics::draw(
                     ctx,
@@ -123,8 +125,6 @@ impl event::EventHandler<ggez::GameError> for MainState {
                         self.SCREEN_HEIGHT_HALF,
                     )),
                 )?;
-                graphics::present(ctx)?;
-                Ok(())
             }
             GameState::InGame => {
                 graphics::draw(
@@ -172,11 +172,22 @@ impl event::EventHandler<ggez::GameError> for MainState {
                     &hp_text,
                     draw_param.dest(glam::Vec2::new(self.SCREEN_WIDTH - hp_rect.w, 0.0)),
                 )?;
-                graphics::present(ctx)?;
-                Ok(())
             }
-            _ => Ok(()),
+            GameState::StartScreen => {
+                let start_text = graphics::Text::new(" Crab-A-Coconut\nPress z to start");
+                let start_rect = start_text.dimensions(ctx);
+                graphics::draw(
+                    ctx,
+                    &start_text,
+                    draw_param.dest(glam::Vec2::new(
+                        self.SCREEN_WIDTH_HALF - start_rect.w / 2.0,
+                        self.SCREEN_HEIGHT_HALF,
+                    )),
+                )?;
+            }
         }
+        graphics::present(ctx)?;
+        Ok(())
     }
 }
 
